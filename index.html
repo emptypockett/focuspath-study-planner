@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#10172a">
+  <meta name="description" content="FocusPath is a personal study planner with tasks, focus sessions, goals, and progress insights.">
+  <title>FocusPath — Study with intention</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="FocusPath home"><span class="brand-icon">F</span><span>focuspath</span></a>
+      <div class="side-label">WORKSPACE</div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="overview"><span class="nav-icon">◫</span> Overview</button>
+        <button class="nav-item" data-view="tasks"><span class="nav-icon">☷</span> My tasks <span class="nav-count" id="nav-task-count">0</span></button>
+        <button class="nav-item" data-view="focus"><span class="nav-icon">◷</span> Focus timer</button>
+        <button class="nav-item" data-view="insights"><span class="nav-icon">↗</span> Insights</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="tip-card"><span class="tip-spark">✦</span><strong>Small steps add up.</strong><p>Consistency matters more than a perfect study day.</p></div>
+        <button class="nav-item settings-link" id="export-btn"><span class="nav-icon">⇩</span> Export my data</button>
+        <button class="nav-item settings-link" id="import-btn"><span class="nav-icon">⇧</span> Import backup</button>
+        <input id="import-file" type="file" accept="application/json" hidden>
+      </div>
+      <div class="profile"><div class="avatar">S</div><div><strong>My workspace</strong><span>Personal study space</span></div><button id="theme-toggle" class="icon-button" aria-label="Toggle theme" title="Toggle theme">◐</button></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar"><div class="mobile-brand"><span class="brand-icon">F</span> focuspath</div><div class="breadcrumb">Workspace <span>/</span> <b id="breadcrumb-current">Overview</b></div><div class="top-actions"><span class="today-chip" id="header-date">Today</span><button class="icon-button" id="quick-add" aria-label="Add a task" title="Add a task">＋</button></div></header>
+
+      <section class="view active" id="view-overview">
+        <div class="hero">
+          <div><p class="eyebrow">YOUR PERSONAL STUDY SPACE</p><h1>Make today<br><span>count.</span></h1><p class="hero-copy">A little progress every day leads to meaningful results. Let's get started.</p></div>
+          <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-core">✦</div><div class="art-dot dot-one"></div><div class="art-dot dot-two"></div><div class="art-dot dot-three"></div></div>
+        </div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span>Tasks completed</span><span class="stat-icon purple">✓</span></div><strong id="stat-completed">0</strong><small>All-time completed tasks</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Focus time</span><span class="stat-icon blue">◷</span></div><strong id="stat-focus">0m</strong><small>Total recorded focus time</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Current streak</span><span class="stat-icon orange">✦</span></div><strong id="stat-streak">0 days</strong><small>Days with completed focus sessions</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Completion rate</span><span class="stat-icon green">↗</span></div><strong id="stat-rate">0%</strong><small>Completed out of all tasks</small></article>
+        </div>
+        <div class="dashboard-grid">
+          <article class="panel today-panel">
+            <div class="panel-heading"><div><p class="eyebrow">STAY ON TRACK</p><h2>Today's tasks</h2></div><button class="text-button" data-go="tasks">View all <span>→</span></button></div>
+            <div id="overview-task-list" class="compact-list"></div>
+            <div id="overview-empty" class="empty-inline"><span>✧</span><strong>Your day is open.</strong><p>Add a task and give your plans a starting point.</p><button class="secondary-button" data-go="tasks">Create a task</button></div>
+          </article>
+          <article class="panel goal-panel">
+            <div class="panel-heading"><div><p class="eyebrow">WEEKLY TARGET</p><h2>Focus goal</h2></div><span class="goal-badge">THIS WEEK</span></div>
+            <div class="goal-number"><strong id="goal-progress">0</strong><span> / <span id="goal-target">300</span> min</span></div>
+            <div class="progress-track"><div id="goal-bar" class="progress-fill"></div></div>
+            <p class="muted small" id="goal-message">Every focused minute counts.</p>
+            <div class="goal-edit"><label for="weekly-goal">Weekly goal (minutes)</label><div><input type="number" min="30" max="3000" step="30" id="weekly-goal" value="300"><button id="save-goal" class="mini-button">Save</button></div></div>
+          </article>
+        </div>
+        <article class="panel week-panel">
+          <div class="panel-heading"><div><p class="eyebrow">YOUR RHYTHM</p><h2>Focus this week</h2></div><span class="muted small">Minutes per day</span></div>
+          <div id="week-chart" class="week-chart" aria-label="Focus minutes by day"></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-tasks">
+        <div class="page-heading"><div><p class="eyebrow">PLAN WITH PURPOSE</p><h1>My tasks</h1><p class="muted">Keep your assignments clear, manageable, and moving forward.</p></div><button class="primary-button" id="open-task-modal">＋ Add task</button></div>
+        <div class="task-toolbar"><div class="filter-tabs" role="group" aria-label="Task filters"><button class="filter-tab active" data-filter="all">All <span id="filter-all-count">0</span></button><button class="filter-tab" data-filter="active">To do <span id="filter-active-count">0</span></button><button class="filter-tab" data-filter="done">Completed <span id="filter-done-count">0</span></button></div><div class="toolbar-right"><input id="task-search" class="search-input" type="search" placeholder="Search tasks..." aria-label="Search tasks"><select id="subject-filter" aria-label="Filter by subject"><option value="all">All subjects</option><option>Computer Science</option><option>Mathematics</option><option>English</option><option>Physics</option><option>Literature</option><option>Other</option></select></div></div>
+        <div id="full-task-list" class="full-task-list"></div>
+        <div id="tasks-empty" class="empty-state"><div class="empty-symbol">✦</div><h3>No tasks match this view</h3><p>Try another filter or add a new task to your plan.</p><button class="secondary-button" id="empty-add">Add your first task</button></div>
+      </section>
+
+      <section class="view" id="view-focus">
+        <div class="page-heading"><div><p class="eyebrow">PROTECT YOUR ATTENTION</p><h1>Focus timer</h1><p class="muted">Work in a focused block, then take a short break.</p></div></div>
+        <div class="focus-layout">
+          <article class="panel timer-panel">
+            <div class="timer-tabs"><button class="timer-tab active" data-mode="focus">Focus</button><button class="timer-tab" data-mode="short">Short break</button><button class="timer-tab" data-mode="long">Long break</button></div>
+            <div class="timer-ring" id="timer-ring"><div class="timer-inner"><span id="timer-label">FOCUS SESSION</span><strong id="timer-display">25:00</strong><small id="timer-status">Ready when you are</small></div></div>
+            <div class="timer-controls"><button class="primary-button" id="timer-start">Start focus</button><button class="secondary-button" id="timer-reset">Reset</button></div>
+            <p class="timer-note">A completed focus session is saved to your study history. Breaks are not counted as focus time.</p>
+          </article>
+          <article class="panel session-panel"><p class="eyebrow">SESSION NOTES</p><h2>What are you working on?</h2><label for="session-task">Choose a task (optional)</label><select id="session-task"><option value="">No task selected</option></select><label for="session-note">Intention for this session</label><textarea id="session-note" rows="4" maxlength="180" placeholder="e.g. Understand how Python functions work..."></textarea><div class="session-summary"><div><span>Focus length</span><strong>25 minutes</strong></div><div><span>Break length</span><strong>5 minutes</strong></div></div><p class="muted tiny">Tip: Decide on one small outcome before you start.</p></article>
+        </div>
+      </section>
+
+      <section class="view" id="view-insights">
+        <div class="page-heading"><div><p class="eyebrow">NOTICE YOUR PROGRESS</p><h1>Insights</h1><p class="muted">A simple picture of the habits you're building.</p></div></div>
+        <div class="stats-grid insight-stats">
+          <article class="stat-card"><div class="stat-top"><span>Focus sessions</span><span class="stat-icon blue">◷</span></div><strong id="insight-sessions">0</strong><small>Completed 25-minute sessions</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Tasks created</span><span class="stat-icon purple">☷</span></div><strong id="insight-created">0</strong><small>Tasks in your planner</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Best subject</span><span class="stat-icon green">✦</span></div><strong class="subject-best" id="insight-subject">—</strong><small>Most focus time recorded</small></article>
+          <article class="stat-card"><div class="stat-top"><span>Average session</span><span class="stat-icon orange">⌁</span></div><strong id="insight-average">0m</strong><small>Across completed sessions</small></article>
+        </div>
+        <div class="insight-grid"><article class="panel"><div class="panel-heading"><div><p class="eyebrow">SUBJECT BREAKDOWN</p><h2>Where your time goes</h2></div></div><div id="subject-breakdown" class="subject-breakdown"></div></article><article class="panel"><div class="panel-heading"><div><p class="eyebrow">RECENT ACTIVITY</p><h2>Study history</h2></div></div><div id="recent-sessions" class="recent-list"></div></article></div>
+        <p class="privacy-note">Your study data stays in this browser unless you export and share a backup. FocusPath does not send your tasks to a server.</p>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="task-modal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-head"><div><p class="eyebrow">MAKE A PLAN</p><h2 id="modal-title">Add a task</h2></div><button class="icon-button" id="close-modal" aria-label="Close">×</button></div>
+      <form id="task-form">
+        <label for="task-title">Task name</label><input id="task-title" maxlength="90" placeholder="e.g. Practice Python loops" required>
+        <div class="form-two"><div><label for="task-subject">Subject</label><select id="task-subject"><option>Computer Science</option><option>Mathematics</option><option>English</option><option>Physics</option><option>Literature</option><option>Other</option></select></div><div><label for="task-date">Deadline</label><input id="task-date" type="date"></div></div>
+        <div class="form-two"><div><label for="task-priority">Priority</label><select id="task-priority"><option value="normal">Normal</option><option value="high">High</option><option value="low">Low</option></select></div><div><label for="task-estimate">Estimated time (min)</label><input id="task-estimate" type="number" min="5" max="600" step="5" value="30"></div></div>
+        <label for="task-details">Notes (optional)</label><textarea id="task-details" rows="3" maxlength="300" placeholder="What does this task involve?"></textarea>
+        <div class="modal-actions"><button type="button" class="secondary-button" id="cancel-modal">Cancel</button><button type="submit" class="primary-button">Save task</button></div>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
